@@ -24,4 +24,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.menu_view, name='index'),
     path('<path:url>', views.menu_view, name='menu'),
+    path('first/', views.menu_view, name='first'),
 ]

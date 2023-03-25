@@ -66,7 +66,7 @@ def draw_menu(context, menu_name):
         else:
             menu = Menu.objects.prefetch_related('menuitem_set__children').get(name=menu_name)
             return render_menu(menu.menuitem_set.filter(parent=None), menu_item_path)
-    except (ObjectDoesNotExist, NoReverseMatch):
+    except (ObjectDoesNotExist, NoReverseMatch) as e:
         return ''
 
 
@@ -86,8 +86,8 @@ def render_menu(menu_items, path):
         html += '<li class="active">' if active else '<li>'
         html += '<a href="{}">{}</a>'.format(url, menu_item.title)
 
-        children = menu_item.children.all()
-        if children and (active or any(is_menu_item_path_active(child, path) for child in children)):
+        children = MenuItem.objects.filter(parent=menu_item.id)
+        if menu_items.exists() and (active or any(is_menu_item_path_active(child, path) for child in children)):
             html += render_menu(children, path)
 
         html += '</li>'
