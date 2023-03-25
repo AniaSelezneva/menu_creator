@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 
 
@@ -18,3 +19,9 @@ class MenuItem(models.Model):
 
     def __str__(self):
         return self.title
+
+    def clean(self):
+        if self.parent == self:
+            raise ValidationError("An item cannot be its own parent.")
+        elif self.parent and self.parent.menu != self.menu:
+            raise ValidationError("Parent item does not belong to the same menu.")
