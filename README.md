@@ -6,7 +6,7 @@
 
 - Клонируйте репозиторий проекта с GitHub: `git clone https://github.com/AniaSelezneva/menu_creator.git`
 
-- Примените миграций: `python3 manage.py migrate`
+- Примените миграции: `python3 manage.py migrate`
 
 - Запустите сервер: `python3 manage.py runserver`
 
