@@ -18,7 +18,7 @@ def get_ancestor_titles(menu_item):
 
 
 def is_path_matching_menu_item(menu_item, path):
-    path = '/'.join(list(filter(lambda x: x != '', path.split('/'))))
+    path = '/'.join(list(path.strip('/').split('/')))
     ancestor_titles = get_ancestor_titles(menu_item)
 
     if len(ancestor_titles) > 0:
@@ -26,10 +26,7 @@ def is_path_matching_menu_item(menu_item, path):
     else:
         ancestor_titles += menu_item.title
 
-    if ancestor_titles == path:
-        return True
-    else:
-        return False
+    return ancestor_titles == path
 
 
 def is_menu_item_path_active(menu_item, path):
@@ -56,15 +53,18 @@ def draw_menu(context, menu_name):
         active_item_title = menu_item_titles[-1]
         active_items = MenuItem.objects.filter(title=active_item_title)
 
-        if len(active_item_title) > 0:
+        if active_item_title:
             active_item = active_items.first()
             if active_items.exists() and is_path_matching_menu_item(active_item, menu_item_path):
+                # load menu and all menu items with their children
                 menu = Menu.objects.prefetch_related('menuitem_set__children').get(name=menu_name)
                 return render_menu(menu.menuitem_set.filter(parent=None), menu_item_path)
             else:
                 return ''
         else:
+            # load menu and all menu items with their children
             menu = Menu.objects.prefetch_related('menuitem_set__children').get(name=menu_name)
+            # pass menu and path to render_menu
             return render_menu(menu.menuitem_set.filter(parent=None), menu_item_path)
     except (ObjectDoesNotExist, NoReverseMatch) as e:
         return ''
@@ -73,9 +73,15 @@ def draw_menu(context, menu_name):
 def render_menu(menu_items, path):
     if not menu_items:
         return ''
-    html = '<ul>'
 
-    for menu_item in menu_items.order_by('order'):
+    # load all children of menu_items at once
+    children = MenuItem.objects.filter(parent__in=menu_items).order_by('order')
+    children_dict = {}
+    for child in children:
+        children_dict.setdefault(child.parent_id, []).append(child)
+
+    html = '<ul>'
+    for menu_item in menu_items:
         active = is_menu_item_path_active(menu_item, path)
 
         if menu_item.url_is_named:
@@ -86,11 +92,13 @@ def render_menu(menu_items, path):
         html += '<li class="active">' if active else '<li>'
         html += '<a href="{}">{}</a>'.format(url, menu_item.title)
 
-        children = MenuItem.objects.filter(parent=menu_item.id)
-        if menu_items.exists() and (active or any(is_menu_item_path_active(child, path) for child in children)):
-            html += render_menu(children, path)
+        if children_dict.get(menu_item.id):
+            if active or any(is_menu_item_path_active(child, path) for child in children_dict[menu_item.id]):
+                # pass only relevant children to the recursive call
+                html += render_menu(children_dict[menu_item.id], path)
 
         html += '</li>'
     html += '</ul>'
 
     return mark_safe(html)
+

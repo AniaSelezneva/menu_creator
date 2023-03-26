@@ -1,14 +1,11 @@
-<h1>Menu Creator</h1>
-<p>Приложение создает древовидное меню, основываясь на данных, полученных из ДБ.</p>
-<p>Данные добавляются через стандартную админку.</p>
-<h2>Установка и запуск</h2>
-<ol>
+# Menu Creator
 
-- Клонируйте репозиторий проекта с GitHub: `git clone https://github.com/AniaSelezneva/menu_creator.git`
+Приложение реализовывает древовидное меню, основываясь на данных, полученных из БД.
 
-- Примените миграции: `python3 manage.py migrate`
+Данные добавляются через стандартную админку.
 
-- Запустите сервер: `python3 manage.py runserver`
+## Установка и запуск
 
-</ol>
-
+* Клонируйте репозиторий проекта с GitHub: `git clone https://github.com/AniaSelezneva/menu_creator.git`
+* Примените миграции: `python3 manage.py migrate`
+* Запустите сервер: `python3 manage.py runserver`
