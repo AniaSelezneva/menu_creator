@@ -64,7 +64,6 @@ def draw_menu(context, menu_name):
         else:
             # load menu and all menu items with their children
             menu = Menu.objects.prefetch_related('menuitem_set__children').get(name=menu_name)
-            # pass menu and path to render_menu
             return render_menu(menu.menuitem_set.filter(parent=None), menu_item_path)
     except (ObjectDoesNotExist, NoReverseMatch) as e:
         return ''
